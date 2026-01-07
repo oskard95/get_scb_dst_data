@@ -52,12 +52,13 @@ get_dst_data(
 # 
 
 # BY2
-table <- "BY2"
-get_dst_meta(table, path$raw)
-get_dst_data(
-  table,
-  "https://api.statbank.dk/v1/data/BY2/BULK?lang=en&valuePresentation=Code&KOMK=*&ALDER=*&K%C3%98N=*&Tid=*&BYST=*",
-  path$raw
-)
+#table <- "BY2"
+#get_dst_meta(table, path$raw)
+#get_dst_data(
+#  table,
+#  "https://api.statbank.dk/v1/data/BY2/BULK?lang=en&valuePresentation=Code&KOMK=*&ALDER=*&K%C3%98N=*&Tid=*&BYST=*",
+#  path$raw
+#)
 
-rm(table)
+
+#rm(table)
