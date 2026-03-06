@@ -16,7 +16,7 @@ get_dst_meta(table, path$raw)
 get_dst_data(
   table,
   "https://api.statbank.dk/v1/data/FOLK1A/BULK?lang=en&valuePresentation=Code&OMR%C3%85DE=*&K%C3%98N=*&ALDER=*&CIVILSTAND=TOT&Tid=*",
-  path$raw
+  path$dst
 )
 
 # 
@@ -50,15 +50,14 @@ get_dst_data(
 #   path$raw
 # )
 # 
-
-# BY2
-#table <- "BY2"
-#get_dst_meta(table, path$raw)
-#get_dst_data(
-#  table,
-#  "https://api.statbank.dk/v1/data/BY2/BULK?lang=en&valuePresentation=Code&KOMK=*&ALDER=*&K%C3%98N=*&Tid=*&BYST=*",
-#  path$raw
-#)
-
-
-#rm(table)
+# 
+# # BY2
+# table <- "BY2"
+# get_dst_meta(table, path$raw)
+# get_dst_data(
+#   table,
+#   "https://api.statbank.dk/v1/data/BY2/BULK?lang=en&valuePresentation=Code&KOMK=*&ALDER=*&K%C3%98N=*&Tid=*&BYST=*",
+#   path$raw
+# )
+# 
+# rm(table)

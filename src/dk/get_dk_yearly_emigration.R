@@ -18,9 +18,9 @@ get_dst_data(
   table,
   paste0(
     "https://api.statbank.dk/v1/data/VAN2AAR/BULK?valuePresentation=Code&OMR%C3%85DE=*&K%C3%98N=*&UDVLAND=*&STATSB=*&Tid=*&ALDER=*"),
-  path$raw
+  path$dst
 )
-dat_raw <- arrow::read_parquet(file.path(path$raw, paste0("raw_", tolower(table), ".parquet")))
-src_names <- names(dat_raw)
-
-rm(table, dat_raw, src_names)
+# dat_raw <- arrow::read_parquet(file.path(path$raw, paste0("raw_", tolower(table), ".parquet")))
+# src_names <- names(dat_raw)
+# 
+# rm(table, dat_raw, src_names)
