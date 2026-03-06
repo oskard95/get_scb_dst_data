@@ -125,7 +125,7 @@ main_df <- main_df %>%
 main_df_muni <- main_df |> full_join(municipalities, by = c("mun" = c("municipality_code")))
 
 rm(main_df,municipalities,dk_level_sum,folk1a,fodie,fod207,fly66_in,fly66_out,van1aar,van2aar,raw_fly66,
-   raw_fod207,raw_fodie,raw_folk1a,raw_van1aar,raw_van2aar,path)
+   raw_fod207,raw_fodie,raw_folk1a,raw_van1aar,raw_van2aar)
 
 # dput(main_df_muni, file = "dat/final/dk_df.R")
 fname <- "dk_df"

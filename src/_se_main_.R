@@ -1,6 +1,6 @@
 # Title     : Fetching and prepping statistics on deaths for Denmark and Sweden
 # Objective : Main file to launch the modules
-# Created by: Aleksandrs Aleksandrovs
+# Created by: Óskar
 # Created on: 22-02-2021
 
 

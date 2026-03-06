@@ -4,7 +4,7 @@
   "description": ["Deaths by region, age, sex and time"],
   "unit": ["Number"],
   "suppressedDataValue": ["0"],
-  "updated": ["2025-02-11T08:00:00"],
+  "updated": ["2026-02-12T08:00:00"],
   "active": [true],
   "contacts": [
     {
@@ -957,6 +957,10 @@
         {
           "id": "2024",
           "text": "2024"
+        },
+        {
+          "id": "2025",
+          "text": "2025"
         }
       ]
     }

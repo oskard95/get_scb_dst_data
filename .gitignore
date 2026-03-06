@@ -1,0 +1,16 @@
+# Data files
+dat/**/*.csv
+dat/**/*.xlsx
+dat/**/*.rds
+dat/**/*.RData
+dat/**/*.parquet
+
+# R specific
+.Rproj.user/
+.Rhistory
+.RData
+.Renviron
+
+# OS garbage
+.DS_Store
+Thumbs.db
