@@ -1,0 +1,26 @@
+{
+    "id": "DAE8509B",
+    "path": "C:/Users/oskar/Nextcloud/projects/scb_dst_get_data/src/prep_dk_data.R",
+    "project_path": "src/prep_dk_data.R",
+    "type": "r_source",
+    "hash": "1569728004",
+    "contents": "",
+    "dirty": false,
+    "created": 1771447701290.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "137,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1767793433,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1767793433,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,0 +1,243 @@
+#Loading packages
+library(tidyverse)
+library(readxl)
+
+
+#preparing raw population by municipality
+#loading the raw data
+popdf1 <- read_xlsx(path = "Data/dk/population/population1.xlsx", skip = 2)
+pdf2 <- read_xlsx(path = "Data/dk/population/population2.xlsx", skip = 2)
+popdf2 <- pdf2[-c(12475:12476),-c(1:2)]
+pdf3 <- read_xlsx(path = "Data/dk/population/population3.xlsx", skip = 2)
+popdf3 <- pdf3[-c(12475:12476),-c(1:2)]
+pdf4 <- read_xlsx(path = "Data/dk/population/pop2023.xlsx", skip = 2)
+popdf4 <- pdf4[-c(12475:12476),-c(1:2)]
+popdf <- cbind(popdf1,popdf2,popdf3,popdf4)
+
+#Formatting the data into my preferred format
+cleanedp <- popdf %>%
+  pivot_longer(cols = "2007":"2023") %>% 
+  rename("year" = "name",
+         "age" = "...2",
+         "municipality" = "...1",
+         "population" = "value") %>% 
+  fill(municipality) %>% 
+  mutate(age = as.numeric(str_remove_all(age, "[A-Za-z]"))) %>% 
+#Create mid year estimates and then set 2021 as the jan first counts.
+  group_by(municipality,year) %>%  
+  summarise(age = case_when(age>99 ~ 99,TRUE ~ age),
+            population) %>%
+  group_by(municipality,age, year) %>% 
+  summarise(population=sum(population)) %>% 
+  mutate(id_var = paste0(age, "_", year, "_", municipality),
+         mid.pop = (population + lead(population)) / 2) %>% 
+  filter(year != 2023) %>% 
+  ungroup()
+                                        
+rm(pdf2,pdf3,popdf1,popdf2,popdf3,popdf4,pdf4,popdf)
+
+
+  
+#preparing births by municipality
+#Loading the raw data
+births <- read_xlsx(path = "Data/dk/births/births.xlsx", skip = 2) 
+#Formatting the data into my preferred  format
+cleanedb <- births %>% 
+  pivot_longer(cols = "2007":"2022") %>% 
+  rename("age" = "...1",
+         "municipality" = "...2",
+         "year" = "name",
+         "births" = "value") %>% 
+  fill(age) %>% 
+  mutate(age = as.numeric(str_remove_all(age, "[A-Za-z]")),
+         id_var = paste0(age, "_", year, "_", municipality)) %>% 
+  ungroup()
+rm(births)
+
+
+#preparing deaths by municipality
+#Loading the raw data
+deaths1 <- read_xlsx(path = "Data/dk/deaths/deaths1.xlsx", skip = 2)
+d2 <- read_xlsx(path = "Data/dk/deaths/deaths2.xlsx", skip = 2)
+deaths2 <- d2[,-c(1:2)]
+dthdf <- cbind(deaths1,deaths2)
+#Formatting the data into my preferred format
+cleanedd <- dthdf %>% 
+  select(-"2006") %>% 
+  pivot_longer(cols = "2007":"2022") %>%
+  rename("year" = "name",
+         "age" = "...2",
+         "municipality" = "...1",
+         "deaths" = "value") %>% 
+  fill(municipality) %>% 
+  mutate(age = as.numeric(str_remove_all(age, "[A-Za-z]")),
+         id_var = paste0(age, "_", year, "_", municipality)) %>% 
+  ungroup()
+rm(d2,deaths1,deaths2,dthdf)
+
+  
+#Preparing in migration by municipality
+#Loading the raw data
+inm1 <- read_xlsx(path = "Data/dk/migration/inmigration1.xlsx", skip = 2)
+inm2 <- read_xlsx(path = "Data/dk/migration/inmigration2.xlsx", skip = 2)
+inmigration2 <- inm2[-c(1:2)]
+inm3 <- read_xlsx(path = "Data/dk/migration/inmigration3.xlsx", skip = 2)
+inmigration3 <- inm3[-c(1:2)]
+inmigration <- cbind(inm1,inmigration2,inmigration3)
+#international migration
+intinm1 <- read_xlsx(path = "Data/dk/migration/intin1.xlsx", skip = 2)
+intinm2 <- read_xlsx(path = "Data/dk/migration/intin2.xlsx", skip = 2)
+intin2 <- intinm2[-c(1:2)]
+intinmigration <- cbind(intinm1,intin2)
+
+#Formatting the data and merging international and internal migration into one df
+cleanedini <- inmigration %>% 
+  pivot_longer(cols = "2007":"2022") %>% 
+  mutate(municipality = str_sub(...1, start = 4)) %>% #Municipalities had "To " in front of names
+  rename("year" = "name",
+         "age" = "...2",
+         "inm" = "value") %>% 
+  fill(municipality) %>% 
+  select(-...1) %>% 
+  mutate(age = as.numeric(str_remove_all(age, "[A-Za-z]"))) %>% 
+  group_by(municipality,year) %>%  
+  summarise(age = case_when(age>99 ~ 99,TRUE ~ age),
+            inm) %>%
+  group_by(age, municipality, year) %>% 
+  summarise(inm=sum(inm)) %>% 
+  mutate(id_var = paste0(age, "_", year, "_", municipality)) %>% 
+  ungroup()
+
+cleanedii <- intinmigration %>% 
+  pivot_longer(cols = "2007":"2022") %>% 
+  mutate(municipality = str_sub(...1)) %>% #Municipalities had "To " in front of names
+  rename("year" = "name",
+         "age" = "...2",
+         "inm" = "value") %>% 
+  fill(municipality) %>% 
+  select(-...1) %>% 
+  mutate(age = as.numeric(str_remove_all(age, "[A-Za-z]"))) %>% 
+  group_by(municipality,year) %>%  
+  summarise(age = case_when(age>99 ~ 99,TRUE ~ age),
+            inm) %>%
+  group_by(age, municipality, year) %>% 
+  summarise(inm=sum(inm)) %>% 
+  mutate(id_var = paste0(age, "_", year, "_", municipality)) %>% 
+  ungroup()
+
+cleanedi <- left_join(x=cleanedini,y= select(cleanedii,-c(age,municipality,year)), by = "id_var") %>% 
+  mutate(inm = inm.x+inm.y) %>% 
+  select(-c(inm.y,inm.x)) %>% 
+  select(age,municipality,year,inm,id_var) 
+rm(inm1,inm2,inmigration2,inm3,inmigration3,inmigration,intinm1,intinm2,
+   intin2,intinmigration,cleanedini,cleanedii)
+
+#preparing out migration by municipality
+#Loading the raw data
+outm1 <- read_xlsx(path = "Data/dk/migration/outmigration1.xlsx", skip = 2)
+outm2 <- read_xlsx(path = "Data/dk/migration/outmigration2.xlsx", skip = 2)
+outmigration2 <- outm2[,-c(1:2)]
+outm3 <- read_xlsx(path = "Data/dk/migration/outmigration3.xlsx", skip = 2)
+outmigration3 <- outm3[,-c(1:2)]
+outmigration <- cbind(outm1,outmigration2,outmigration3)
+#international migration
+intoutm1 <- read_xlsx(path = "Data/dk/migration/intout1.xlsx", skip = 2)
+intoutm2 <- read_xlsx(path = "Data/dk/migration/intout2.xlsx", skip = 2)
+intoutm2 <- intoutm2[-c(1:2)]
+intoutmigration <- cbind(intoutm1,intoutm2)
+
+#Formatting the data into my preferred format
+cleanedino <- outmigration %>% 
+  pivot_longer(cols = "2007":"2022") %>%
+  mutate(municipality = str_sub(...1, start = 6)) %>% #Municipalities had "From " in front of names
+  rename("year" = "name",
+         "age" = "...2",
+         "outm" = "value") %>% 
+  fill(municipality) %>% 
+  select(-...1) %>% 
+  mutate(age = as.numeric(str_remove_all(age, "[A-Za-z]"))) %>% 
+  group_by(municipality,year) %>%  
+  summarise(age = case_when(age>99 ~ 99,TRUE ~ age),
+            outm) %>%
+  group_by(age, municipality, year) %>% 
+  summarise(outm=sum(outm)) %>% 
+  mutate(id_var = paste0(age, "_", year, "_", municipality)) %>% 
+  ungroup()
+#Now prepare the data frame
+cleanedoo <- intoutmigration %>% 
+  pivot_longer(cols = "2007":"2022") %>% 
+  mutate(municipality = str_sub(...1)) %>% #Municipalities had "To " in front of names
+  rename("year" = "name",
+         "age" = "...2",
+         "outm" = "value") %>% 
+  fill(municipality) %>% 
+  select(-...1) %>% 
+  mutate(age = as.numeric(str_remove_all(age, "[A-Za-z]"))) %>% 
+  group_by(municipality,year) %>%  
+  summarise(age = case_when(age>99 ~ 99,TRUE ~ age),
+            outm) %>%
+  group_by(age, municipality, year) %>% 
+  summarise(outm=sum(outm)) %>% 
+  mutate(id_var = paste0(age, "_", year, "_", municipality)) %>% 
+  ungroup()
+
+cleanedo <- left_join(x=cleanedino,y= select(cleanedoo,-c(age,municipality,year)), by = "id_var") %>% 
+  mutate(outm = outm.x+outm.y) %>% 
+  select(-c(outm.y,outm.x)) %>% 
+  select(age,municipality,year,outm,id_var) 
+rm(outm1,outm2,outm3,outmigration2,outmigration3,outmigration,cleanedino,cleanedoo,
+   intoutm1,intoutm2,intoutmigration)
+
+
+
+
+
+
+
+#Merge all into one data frame, arrange the columns and calculate age specific death rate
+
+
+modeldf <- 
+  left_join(x = cleanedp,y = select(cleanedo, -c(age,year,municipality))) %>% 
+  left_join(., y = select(cleanedi, -c(age,year,municipality))) %>% 
+  left_join(., y = select(cleanedb, -c(age,year,municipality))) %>% 
+  left_join(., y = select(cleanedd, -c(age,year,municipality))) %>% 
+  select(municipality, year, age,mid.pop, births, inm, outm,deaths,population) %>% 
+  group_by(year, municipality) %>% 
+  ungroup()
+modeldf[is.na(modeldf)] <- 0
+
+#Create a baseline for Denmark
+dkbase <- modeldf %>% 
+  select(age,year, mid.pop, births,deaths,inm,outm,population) %>%  
+  group_by(year,age) %>% 
+  summarise(deaths = sum(deaths),
+            mid.pop = sum(mid.pop),
+            population = sum(population),
+            deaths = sum(deaths),
+            births = sum(births),
+            inm = sum(inm),
+            outm = sum(outm),
+            .groups = "drop") %>% 
+  ungroup() %>% 
+  group_by(year) %>% 
+  mutate(exp = sum(mid.pop),
+         municipality = "Denmark") %>% 
+  group_by(age) %>% 
+  select(municipality, year,age,mid.pop,births,inm,outm,deaths,population)
+
+
+modeldf <- rbind(dkbase,modeldf)
+
+rm(dkbase,cleanedp,cleanedd,cleanedi,cleanedo,cleanedb)
+
+
+
+save(modeldf, file = "Data/output/modeldf.RData")
+
+
+
+
+
+
+
